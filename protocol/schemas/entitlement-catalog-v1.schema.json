@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kernelbridge.dev/protocol/schemas/entitlement-catalog-v1.schema.json",
+  "title": "KernelBridge Entitlement Catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "product_code",
+    "catalog_revision",
+    "packages",
+    "plans"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "product_code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_-]{1,63}$"
+    },
+    "catalog_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "modules"
+        ],
+        "properties": {
+          "key": {
+            "$ref": "#/$defs/key"
+          },
+          "modules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "key",
+                "capabilities"
+              ],
+              "properties": {
+                "key": {
+                  "$ref": "#/$defs/key"
+                },
+                "capabilities": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/catalogCapability"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "grants"
+        ],
+        "properties": {
+          "key": {
+            "$ref": "#/$defs/key"
+          },
+          "grants": {
+            "type": "object",
+            "propertyNames": {
+              "pattern": "^[a-z][a-z0-9_.-]{0,127}$"
+            },
+            "additionalProperties": {
+              "$ref": "entitlement-framework-v1.schema.json#/$defs/grant"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{0,127}$"
+    },
+    "catalogCapability": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "key",
+            "type"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/key"
+            },
+            "type": {
+              "const": "capability"
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "key",
+            "type",
+            "unit",
+            "scope"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/key"
+            },
+            "type": {
+              "const": "limit"
+            },
+            "unit": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_.-]{0,63}$"
+            },
+            "scope": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_.-]{0,63}$"
+            },
+            "period": {
+              "$ref": "entitlement-framework-v1.schema.json#/$defs/period"
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        }
+      ]
+    }
+  }
+}

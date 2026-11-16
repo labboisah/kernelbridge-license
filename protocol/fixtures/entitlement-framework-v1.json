@@ -1,0 +1,294 @@
+{
+  "format_version": 1,
+  "context": {
+    "expected_product_code": "MEDIFLOW",
+    "claimed_product_code": "MEDIFLOW",
+    "expected_license_uuid": "22222222-2222-4222-8222-222222222222",
+    "claimed_license_uuid": "22222222-2222-4222-8222-222222222222",
+    "expected_source": "direct",
+    "catalog_revision": 12,
+    "minimum_source_revision": 17,
+    "catalog": {
+      "laboratory.results.view": {
+        "type": "capability"
+      },
+      "branches.max": {
+        "type": "limit",
+        "unit": "branches",
+        "scope": "business"
+      },
+      "invoices.monthly.max": {
+        "type": "limit",
+        "unit": "invoices",
+        "scope": "business",
+        "period": {
+          "unit": "month",
+          "reset": "calendar",
+          "time_zone": "Africa/Accra"
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "valid-direct-capability",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"laboratory.results.view\":{\"type\":\"capability\",\"enabled\":true}}}",
+      "expected": {
+        "valid": true,
+        "error": null
+      }
+    },
+    {
+      "id": "valid-platform-calendar-limit",
+      "payload_json": "{\"schema_version\":1,\"source\":\"product_platform\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"invoices.monthly.max\":{\"type\":\"limit\",\"state\":\"finite\",\"value\":100,\"unit\":\"invoices\",\"scope\":\"business\",\"period\":{\"unit\":\"month\",\"reset\":\"calendar\",\"time_zone\":\"Africa/Accra\"}}}}",
+      "context": {
+        "expected_source": "product_platform"
+      },
+      "expected": {
+        "valid": true,
+        "error": null
+      }
+    },
+    {
+      "id": "valid-unlimited-limit",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"branches.max\":{\"type\":\"limit\",\"state\":\"unlimited\",\"unit\":\"branches\",\"scope\":\"business\"}}}",
+      "expected": {
+        "valid": true,
+        "error": null
+      }
+    },
+    {
+      "id": "reject-malformed-json",
+      "payload_json": "{\"schema_version\":1,",
+      "expected": {
+        "valid": false,
+        "error": "malformed_json"
+      }
+    },
+    {
+      "id": "reject-malformed-unclosed-string",
+      "payload_json": "{\"schema_version\":1,\"broken",
+      "expected": {
+        "valid": false,
+        "error": "malformed_json"
+      }
+    },
+    {
+      "id": "reject-duplicate-grant-key",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"laboratory.results.view\":{\"type\":\"capability\",\"enabled\":true},\"laboratory.results.view\":{\"type\":\"capability\",\"enabled\":false}}}",
+      "expected": {
+        "valid": false,
+        "error": "duplicate_key"
+      }
+    },
+    {
+      "id": "reject-unsupported-schema",
+      "payload_json": "{\"schema_version\":2,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "unsupported_schema"
+      }
+    },
+    {
+      "id": "reject-invalid-source",
+      "payload_json": "{\"schema_version\":1,\"source\":\"hybrid\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "invalid_source"
+      }
+    },
+    {
+      "id": "reject-source-not-bound-to-installation",
+      "payload_json": "{\"schema_version\":1,\"source\":\"product_platform\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "invalid_source"
+      }
+    },
+    {
+      "id": "reject-product-mismatch",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{}}",
+      "context": {
+        "claimed_product_code": "OTHERPRODUCT"
+      },
+      "expected": {
+        "valid": false,
+        "error": "product_mismatch"
+      }
+    },
+    {
+      "id": "reject-license-association-mismatch",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{}}",
+      "context": {
+        "claimed_license_uuid": "99999999-9999-4999-8999-999999999999"
+      },
+      "expected": {
+        "valid": false,
+        "error": "license_mismatch"
+      }
+    },
+    {
+      "id": "reject-catalog-revision-mismatch",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":13,\"source_revision\":18,\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "catalog_revision_mismatch"
+      }
+    },
+    {
+      "id": "reject-stale-source-revision",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":16,\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "stale_source_revision"
+      }
+    },
+    {
+      "id": "reject-unknown-grant-key",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"laboratory.results.delete\":{\"type\":\"capability\",\"enabled\":true}}}",
+      "expected": {
+        "valid": false,
+        "error": "unknown_grant"
+      }
+    },
+    {
+      "id": "reject-unknown-grant-type",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"laboratory.results.view\":{\"type\":\"module\",\"enabled\":true}}}",
+      "expected": {
+        "valid": false,
+        "error": "unknown_grant_type"
+      }
+    },
+    {
+      "id": "reject-malformed-grant",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"laboratory.results.view\":{\"type\":\"capability\",\"enabled\":\"true\"}}}",
+      "expected": {
+        "valid": false,
+        "error": "malformed_grant"
+      }
+    },
+    {
+      "id": "reject-invalid-unit",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"branches.max\":{\"type\":\"limit\",\"state\":\"finite\",\"value\":5,\"unit\":\"users\",\"scope\":\"business\"}}}",
+      "expected": {
+        "valid": false,
+        "error": "invalid_unit"
+      }
+    },
+    {
+      "id": "reject-invalid-scope",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"branches.max\":{\"type\":\"limit\",\"state\":\"finite\",\"value\":5,\"unit\":\"branches\",\"scope\":\"user\"}}}",
+      "expected": {
+        "valid": false,
+        "error": "invalid_scope"
+      }
+    },
+    {
+      "id": "reject-invalid-period-time-zone",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"invoices.monthly.max\":{\"type\":\"limit\",\"state\":\"finite\",\"value\":100,\"unit\":\"invoices\",\"scope\":\"business\",\"period\":{\"unit\":\"month\",\"reset\":\"calendar\",\"time_zone\":\"Mars/Olympus\"}}}}",
+      "context": {
+        "catalog": {
+          "invoices.monthly.max": {
+            "type": "limit",
+            "unit": "invoices",
+            "scope": "business",
+            "period": {
+              "unit": "month",
+              "reset": "calendar",
+              "time_zone": "Mars/Olympus"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error": "invalid_period"
+      }
+    },
+    {
+      "id": "reject-invalid-period-reset",
+      "payload_json": "{\"schema_version\":1,\"source\":\"direct\",\"catalog_revision\":12,\"source_revision\":18,\"grants\":{\"invoices.monthly.max\":{\"type\":\"limit\",\"state\":\"finite\",\"value\":100,\"unit\":\"invoices\",\"scope\":\"business\",\"period\":{\"unit\":\"month\",\"reset\":\"rolling\",\"time_zone\":\"Africa/Accra\"}}}}",
+      "expected": {
+        "valid": false,
+        "error": "invalid_period"
+      }
+    }
+  ],
+  "update_context": {
+    "expected_product_code": "MEDIFLOW",
+    "expected_license_uuid": "22222222-2222-4222-8222-222222222222",
+    "expected_account_link_uuid": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "catalog_revision": 12,
+    "current_source_revision": 17,
+    "catalog": {
+      "laboratory.results.view": {
+        "type": "capability"
+      },
+      "branches.max": {
+        "type": "limit",
+        "unit": "branches",
+        "scope": "business"
+      },
+      "invoices.monthly.max": {
+        "type": "limit",
+        "unit": "invoices",
+        "scope": "business",
+        "period": {
+          "unit": "month",
+          "reset": "calendar",
+          "time_zone": "Africa/Accra"
+        }
+      }
+    }
+  },
+  "update_cases": [
+    {
+      "id": "valid-platform-update",
+      "payload_json": "{\"schema_version\":1,\"product_code\":\"MEDIFLOW\",\"license_uuid\":\"22222222-2222-4222-8222-222222222222\",\"account_link_uuid\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"catalog_revision\":12,\"source_revision\":18,\"idempotency_key\":\"update-18\",\"grants\":{\"laboratory.results.view\":{\"type\":\"capability\",\"enabled\":true}}}",
+      "expected": {
+        "valid": true,
+        "error": null
+      }
+    },
+    {
+      "id": "reject-update-product-mismatch",
+      "payload_json": "{\"schema_version\":1,\"product_code\":\"OTHERPRODUCT\",\"license_uuid\":\"22222222-2222-4222-8222-222222222222\",\"account_link_uuid\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"catalog_revision\":12,\"source_revision\":18,\"idempotency_key\":\"update-18\",\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "product_mismatch"
+      }
+    },
+    {
+      "id": "reject-update-license-mismatch",
+      "payload_json": "{\"schema_version\":1,\"product_code\":\"MEDIFLOW\",\"license_uuid\":\"99999999-9999-4999-8999-999999999999\",\"account_link_uuid\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"catalog_revision\":12,\"source_revision\":18,\"idempotency_key\":\"update-18\",\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "license_mismatch"
+      }
+    },
+    {
+      "id": "reject-update-account-link-mismatch",
+      "payload_json": "{\"schema_version\":1,\"product_code\":\"MEDIFLOW\",\"license_uuid\":\"22222222-2222-4222-8222-222222222222\",\"account_link_uuid\":\"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb\",\"catalog_revision\":12,\"source_revision\":18,\"idempotency_key\":\"update-18\",\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "account_link_mismatch"
+      }
+    },
+    {
+      "id": "reject-update-stale-revision",
+      "payload_json": "{\"schema_version\":1,\"product_code\":\"MEDIFLOW\",\"license_uuid\":\"22222222-2222-4222-8222-222222222222\",\"account_link_uuid\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"catalog_revision\":12,\"source_revision\":17,\"idempotency_key\":\"update-17\",\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "stale_source_revision"
+      }
+    },
+    {
+      "id": "reject-update-unsupported-schema",
+      "payload_json": "{\"schema_version\":2,\"product_code\":\"MEDIFLOW\",\"license_uuid\":\"22222222-2222-4222-8222-222222222222\",\"account_link_uuid\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"catalog_revision\":12,\"source_revision\":18,\"idempotency_key\":\"update-18\",\"grants\":{}}",
+      "expected": {
+        "valid": false,
+        "error": "unsupported_schema"
+      }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kernelbridge.dev/protocol/schemas/entitlement-update-v1.schema.json",
+  "title": "KernelBridge Platform Entitlement Update v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "product_code",
+    "license_uuid",
+    "account_link_uuid",
+    "catalog_revision",
+    "source_revision",
+    "idempotency_key",
+    "grants"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "product_code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_-]{1,63}$"
+    },
+    "license_uuid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "account_link_uuid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "catalog_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "grants": {
+      "$ref": "entitlement-framework-v1.schema.json#/properties/grants"
+    }
+  }
+}
